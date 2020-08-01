@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/task
+	http://www.springframework.org/schema/task/spring-task.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx.xsd
+">
+
+	<!-- 扫描service包 -->
+	<context:component-scan base-package="org.imooc.service" />
+	<!-- 扫描task包 -->
+	<context:component-scan base-package="org.imooc.task"/>
+
+	<context:property-placeholder location="classpath:*.properties"/>
+	<!-- 配置数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+		<property name="jdbcUrl" value="${dataSource.url}"></property>
+		<property name="user" value="${dataSource.username}"></property>
+		<property name="password" value="${dataSource.password}"></property>
+	</bean>
+
+	<!-- 配置sqlSessionFactory -->
+	<bean id="factory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="configLocation" value="classpath:mybatis-config.xml"/>
+		<property name="typeAliasesPackage" value="org.imooc.bean"/>
+	</bean>
+
+	<!-- 扫描Dao接口包 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="factory"/>
+		<property name="basePackage" value="org.imooc.dao"/>
+	</bean>
+
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager"  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	<!-- 事务采用全注解方式 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+	<!-- 启用定时任务 -->
+<!--	<task:scheduled-tasks>-->
+<!--		<task:scheduled ref="BusinessTask" method="synNumber" cron="10 */5 * * * ?"/>-->
+<!--		<task:scheduled ref="BusinessTask" method="synStar" cron="0 */5 * * * ?"/>-->
+<!--	</task:scheduled-tasks>-->
+
+</beans>
